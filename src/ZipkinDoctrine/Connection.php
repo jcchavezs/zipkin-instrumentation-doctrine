@@ -5,7 +5,7 @@ namespace ZipkinDoctrine;
 use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Statement;
+use Exception;
 use Zipkin\Tags;
 use Zipkin\Tracer;
 
@@ -117,6 +117,26 @@ final class Connection extends DBALConnection
         } finally {
             $span->finish();
         }
+    }
+
+    /**
+     * {@inhertidoc}
+     */
+    public function prepare($statement)
+    {
+        if ($this->tracer == null) {
+            return parent::prepare($statement);
+        }
+
+        try {
+            $stmt = new Statement($statement, $this, $this->tracer);
+        } catch (Exception $ex) {
+            throw DBALException::driverExceptionDuringQuery($this->_driver, $ex, $statement);
+        }
+
+        $stmt->setFetchMode($this->defaultFetchMode);
+
+        return $stmt;
     }
 
     /**
