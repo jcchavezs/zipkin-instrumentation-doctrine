@@ -17,30 +17,41 @@ final class Connection extends DBALConnection
     private $tracer;
 
     /**
-     * @var Tracer $tracer
+     * @var array
      */
-    public function setTracer(Tracer $tracer)
+    private $options;
+
+    /**
+     * @var Tracer $tracer
+     * @var array $options
+     */
+    public function setTracer(Tracer $tracer, $options = [])
     {
         $this->tracer = $tracer;
+        $options = is_array($options) ? $options : [];
+        $this->options = [
+            'affected_rows' => array_key_exists('affected_rows', $options)
+            ? $options['affected_rows'] : false,
+        ];
     }
 
     /**
      * {@inhertidoc}
      */
-    public function executeQuery($query, array $params = array(), $types = array(), ?QueryCacheProfile $qcp = null)
+    public function executeQuery($query, array $params = array(), $types = array(), QueryCacheProfile $qcp = null)
     {
         if ($this->tracer === null) {
             return parent::executeQuery($query, $params, $types, $qcp);
         }
 
         $span = $this->tracer->nextSpan();
-        $span->setName('query');
+        $span->setName('sql/query');
         $span->tag(Tags\SQL_QUERY, $query);
 
         try {
             $span->start();
             $stmt = parent::executeQuery($query, $params, $types, $qcp);
-            if (method_exists($stmt, 'rowCount')) {
+            if ($this->shouldTraceAffectedRows()) {
                 $span->tag('sql.affected_rows', $stmt->rowCount());
             }
             return $stmt;
@@ -62,13 +73,15 @@ final class Connection extends DBALConnection
         }
 
         $span = $this->tracer->nextSpan();
-        $span->setName('query');
+        $span->setName('sql/update');
         $span->tag(Tags\SQL_QUERY, $query);
 
         try {
             $span->start();
             $affectedRows = parent::executeUpdate($query, $params, $types);
-            $span->tag('sql.affected_rows', $affectedRows);
+            if ($this->shouldTraceAffectedRows()) {
+                $span->tag('sql.affected_rows', $affectedRows);
+            }
             return $affectedRows;
         } catch (DBALException $e) {
             $span->tag(Tags\ERROR, $e->getMessage());
@@ -88,13 +101,15 @@ final class Connection extends DBALConnection
         }
 
         $span = $this->tracer->nextSpan();
-        $span->setName('query');
+        $span->setName('sql/exec');
         $span->tag(Tags\SQL_QUERY, $statement);
 
         try {
             $span->start();
             $affectedRows = parent::exec($statement);
-            $span->tag('sql.affected_rows', $affectedRows);
+            if ($this->shouldTraceAffectedRows()) {
+                $span->tag('sql.affected_rows', $affectedRows);
+            }
             return $affectedRows;
         } catch (DBALException $e) {
             $span->tag(Tags\ERROR, $e->getMessage());
@@ -102,5 +117,13 @@ final class Connection extends DBALConnection
         } finally {
             $span->finish();
         }
+    }
+
+    /**
+     * @return bool
+     */
+    private function shouldTraceAffectedRows()
+    {
+        return $this->options['affected_rows'];
     }
 }
