@@ -124,7 +124,7 @@ final class Connection extends DBALConnection
      */
     public function prepare($statement)
     {
-        if ($this->tracer == null) {
+        if ($this->tracer === null) {
             return parent::prepare($statement);
         }
 

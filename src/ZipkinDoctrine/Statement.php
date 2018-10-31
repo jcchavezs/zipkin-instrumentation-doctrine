@@ -2,7 +2,7 @@
 
 namespace ZipkinDoctrine;
 
-use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Connection as DBALConnection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Statement as DBALStatement;
 use Zipkin\Tracer;
@@ -15,7 +15,7 @@ class Statement extends DBALStatement
      */
     private $tracer;
 
-    public function __construct($sql, Connection $conn, Tracer $tracer)
+    public function __construct($sql, DBALConnection $conn, Tracer $tracer)
     {
         parent::__construct($sql, $conn);
         $this->tracer = $tracer;
