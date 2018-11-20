@@ -12,9 +12,9 @@ final class CompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $containerBuilder)
     {
-        if (!$containerBuilder->hasDefinition('doctrine.tracer.zipkin')) {
+        if (!$containerBuilder->hasDefinition('zipkin_doctrine.tracer')) {
             $containerBuilder
-                ->register('doctrine.tracer.zipkin')
+                ->register('zipkin_doctrine.tracer')
                 ->setClass(Tracer::class)
                 ->setFactory([new Reference('zipkin.default_tracing'), 'getTracer']);
         }
@@ -26,8 +26,8 @@ final class CompilerPass implements CompilerPassInterface
                     [
                         'setTracer',
                         [
-                            new Reference('doctrine.tracer.zipkin'),
-                            new Parameter('doctrine.tracer.zipkin.options'),
+                            new Reference('zipkin_doctrine.tracer'),
+                            new Parameter('zipkin_doctrine.options'),
                         ],
                     ],
                 ]);

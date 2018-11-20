@@ -2,12 +2,18 @@
 
 namespace ZipkinDoctrine\Integrations\Symfony;
 
-use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\HttpKernel\Bundle\Bundle as KernelBundle;
+use ZipkinDoctrine\Integrations\Symfony\DependencyInjection\Extension;
 
-class Bundle extends KernelBundle
+final class Bundle extends KernelBundle
 {
+    public function getContainerExtensionClass()
+    {
+        return Extension::class;
+    }
+
     public function build(ContainerBuilder $container)
     {
         $container->addCompilerPass(
