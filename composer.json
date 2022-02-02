@@ -9,9 +9,9 @@
             "email": "jcchavezs@gmail.com"
         }
     ],
-    "minimum-stability": "beta",
+    "minimum-stability": "stable",
     "require": {
-        "openzipkin/zipkin": "^1.2.4|^2.0",
+        "openzipkin/zipkin": "^1.2.4|^2.0|^3.0",
         "doctrine/orm": "2.*"
     },
     "require-dev": {
