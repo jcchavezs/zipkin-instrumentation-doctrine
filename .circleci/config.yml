@@ -11,6 +11,11 @@ jobs:
       - image: cimg/php:<< parameters.php-version >>-browsers
     working_directory: ~/zipkin-doctrine
     steps:
+      - run:
+          name: Install PHP extensions
+          command: |
+          sudo docker-php-ext-install pdo_mysql
+          sudo docker-php-ext-enable pdo_mysql
       - checkout
       - run: composer install -n
       - run: composer require openzipkin/zipkin:"^<< parameters.zipkin-php-version >>"
