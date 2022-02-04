@@ -8,7 +8,7 @@ jobs:
       zipkin-php-version:
         type: string
     docker:
-      - image: cimg/php:<< parameters.php-version >>
+      - image: cimg/php:<< parameters.php-version >>-browsers
     working_directory: ~/zipkin-doctrine
     steps:
       - checkout
