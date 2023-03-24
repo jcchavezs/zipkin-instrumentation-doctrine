@@ -19,6 +19,6 @@ composer require jcchavezs/zipkin-instrumentation-doctrine
 
 ## Usage
 
-Head to the documentation for specific framewors:
+Head to the documentation for specific frameworks:
 
 - [Symfony](integrations/Symfony/README.md)
